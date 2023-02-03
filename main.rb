@@ -47,6 +47,10 @@ end
 class Post < ActiveRecord::Base
   has_many :comments, dependent: :destroy
   validates :content, presence: true
+
+  def comments_count
+    self.comments.count
+  end
 end
 
 class Comment < ActiveRecord::Base
