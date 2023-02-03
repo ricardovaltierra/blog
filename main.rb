@@ -74,6 +74,12 @@ class CommentsController < ActionController::Base
   def update; end
 
   def destroy; end
+
+  private
+
+  def comment_params
+    params.require(:comment).permit(:post_id, :author, :content)
+  end
 end
 
 # Tests code
