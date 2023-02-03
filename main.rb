@@ -51,6 +51,8 @@ end
 
 class Comment < ActiveRecord::Base
   belongs_to :post
+
+  validates :content, length: { maximum: 500 }
 end
 
 # Post.create!(content: 'lorem ipsum dolor quet sit amet consectetur adipiscing elit '* 25)
