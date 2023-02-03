@@ -68,7 +68,12 @@ class PostsController < ActionController::Base
 end
 
 class CommentsController < ActionController::Base
-  def index; end
+  def index
+    post = Post.find(params[:post_id])
+    comments = post.comments
+
+    render json: comments
+  end
 
   def show; end
 
