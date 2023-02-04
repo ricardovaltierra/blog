@@ -74,7 +74,7 @@ class PostsController < ActionController::Base
     @post = Post.new(post_params)
 
     if @post.save
-      redner json: @post, status: :created
+      render json: @post, status: :created
     else
       render json: @post.errors, status: :unprocessable_entity
     end
@@ -95,7 +95,9 @@ class CommentsController < ActionController::Base
     render json: comments
   end
 
-  def show; end
+  def show
+    render json: Comment.find(params[:id])
+  end
 
   def create; end
 
