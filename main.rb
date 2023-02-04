@@ -69,6 +69,22 @@ class PostsController < ActionController::Base
   def show
     render json: Post.find(params[:id]).to_json(include: :comments)
   end
+
+  def create
+    @post = Post.new(post_params)
+
+    if @post.save
+      redner json: @post, status: :created
+    else
+      render json: @post.errors, status: :unprocessable_entity
+    end
+  end
+
+  private
+
+  def post_params
+    params.require(:post).permit(:content)
+  end
 end
 
 class CommentsController < ActionController::Base
