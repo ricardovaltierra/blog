@@ -99,13 +99,15 @@ class CommentsController < ActionController::Base
   end
 
   def create
-    @comment = Comment.new(comment_params)
-    @comment.post_id = params[:id]
+    @post = Post.find(params[:post_id])
+    @post.with_lock do
+      @comment = @post.comments.build(comment_params)
 
-    if @comment.save
-      render json: comment_params , status: :ok
-    else
-      render json: { comment: @comment, success: false, message: "Comment could not be saved. Errors: #{@comment.errors}" }, status: :unprocessable_entity
+      if @comment.save
+        render json: comment_params , status: :ok
+      else
+        render json: { comment: @comment, success: false, message: "Comment could not be saved. Errors: #{@comment.errors}" }, status: :unprocessable_entity
+      end
     end
   end
 
@@ -208,13 +210,11 @@ class ComentsControllerTest < ControllerTest
 
   def test_successful_create_request
     before_coments_count = @post.comments_count
-    puts "COMMENTS_COUNT BEFORE REQUEST: #{before_coments_count}"
     post post_comments_url(@post, only_path: true), comment: { author: 'joe.doe', content: 'A new comment' }
     assert last_response.ok?
     assert_equal 'application/json; charset=utf-8', last_response.content_type
     assert_equal "joe.doe", json_response[:author]
     assert_equal "A new comment", json_response[:content]
-    puts "COMMENTS_COUNT AFTER REQUEST: #{@post.reload.comments_count}"
     assert_equal before_coments_count + 1, @post.reload.comments_count
   end
 
