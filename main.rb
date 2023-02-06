@@ -120,7 +120,18 @@ class CommentsController < ActionController::Base
     end
   end
 
-  def destroy; end
+  def destroy
+    @post = Post.find(params[:post_id])
+    @post.with_lock do
+      @comment = Comment.find(params[:id])
+
+      if @comment.destroy
+        render json: nil, status: :no_content
+      else
+        render json: @comment.errors, status: :unprocessable_entity
+      end
+    end
+  end
 
   private
 
@@ -227,7 +238,6 @@ class ComentsControllerTest < ControllerTest
   end
 
   def test_successful_destroy_request
-    skip "Not yet ready for this test"
     delete post_comment_url(@post, @post.comments.first, only_path: true)
     assert_equal 204, last_response.status
   end
