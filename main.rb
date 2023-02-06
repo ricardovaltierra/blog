@@ -74,9 +74,9 @@ class PostsController < ActionController::Base
     @post = Post.new(post_params)
 
     if @post.save
-      render json: @post, status: :created
+      render json: { post: @post, success: true, message: "Post saved successfully" }, status: :created
     else
-      render json: @post.errors, status: :unprocessable_entity
+      render json: { post: @post, success: false, message: "Post could not be saved" }, status: :unprocessable_entity
     end
   end
 
