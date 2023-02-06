@@ -34,6 +34,7 @@ end
 ActiveRecord::Schema.define do
   create_table :posts, force: true do |t|
     t.text :content
+    t.integer :comments_count, default: 0
     t.timestamps
   end
 
@@ -42,19 +43,17 @@ ActiveRecord::Schema.define do
     t.string :author
     t.text :content
   end
+
+  add_index "posts", ["comments_count"], name: "index_posts_on_comments_count", using: :btree
 end
 
 class Post < ActiveRecord::Base
   has_many :comments, dependent: :destroy
   validates :content, presence: true
-
-  def comments_count
-    self.comments.count
-  end
 end
 
 class Comment < ActiveRecord::Base
-  belongs_to :post
+  belongs_to :post, counter_cache: true
 
   validates :content, length: { maximum: 500 }
   validates :author, presence: true
@@ -209,11 +208,13 @@ class ComentsControllerTest < ControllerTest
 
   def test_successful_create_request
     before_coments_count = @post.comments_count
+    puts "COMMENTS_COUNT BEFORE REQUEST: #{before_coments_count}"
     post post_comments_url(@post, only_path: true), comment: { author: 'joe.doe', content: 'A new comment' }
     assert last_response.ok?
     assert_equal 'application/json; charset=utf-8', last_response.content_type
     assert_equal "joe.doe", json_response[:author]
     assert_equal "A new comment", json_response[:content]
+    puts "COMMENTS_COUNT AFTER REQUEST: #{@post.reload.comments_count}"
     assert_equal before_coments_count + 1, @post.reload.comments_count
   end
 
