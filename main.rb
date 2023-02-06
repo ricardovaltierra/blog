@@ -104,7 +104,7 @@ class CommentsController < ActionController::Base
       @comment = @post.comments.build(comment_params)
 
       if @comment.save
-        render json: comment_params , status: :ok
+        render json: @comment , status: :ok
       else
         render json: { comment: @comment, success: false, message: "Comment could not be saved. Errors: #{@comment.errors}" }, status: :unprocessable_entity
       end
