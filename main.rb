@@ -99,7 +99,16 @@ class CommentsController < ActionController::Base
     render json: Comment.find(params[:id])
   end
 
-  def create; end
+  def create
+    @comment = Comment.new(comment_params)
+    @comment.post_id = params[:id]
+
+    if @comment.save
+      render json: comment_params , status: :ok
+    else
+      render json: { comment: @comment, success: false, message: "Comment could not be saved. Errors: #{@comment.errors}" }, status: :unprocessable_entity
+    end
+  end
 
   def update
     @comment = Comment.find(params[:id])
@@ -115,7 +124,7 @@ class CommentsController < ActionController::Base
   private
 
   def comment_params
-    params.require(:comment).permit(:post_id, :author, :content)
+    params.require(:comment).permit(:author, :content)
   end
 end
 
@@ -199,7 +208,6 @@ class ComentsControllerTest < ControllerTest
   end
 
   def test_successful_create_request
-    skip "Not yet ready for this test"
     before_coments_count = @post.comments_count
     post post_comments_url(@post, only_path: true), comment: { author: 'joe.doe', content: 'A new comment' }
     assert last_response.ok?
