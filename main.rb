@@ -112,11 +112,15 @@ class CommentsController < ActionController::Base
   end
 
   def update
-    @comment = Comment.find(params[:id])
-    if @comment.update(comment_params)
-      render json: @comment, status: :ok
-    else
-      render json: @comment.errors, status: :unprocessable_entity
+    @post = Post.find(params[:post_id])
+    @post.with_lock do
+      @comment = Comment.find(params[:id])
+
+      if @comment.update(comment_params)
+        render json: @comment, status: :ok
+      else
+        render json: @comment.errors, status: :unprocessable_entity
+      end
     end
   end
 
