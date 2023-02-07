@@ -104,42 +104,36 @@ class CommentsController < ActionController::Base
 
   def create
     @post = Post.find(params[:post_id])
-    @post.with_lock do
-      @comment = @post.comments.build(comment_params)
+    @comment = @post.comments.build(comment_params)
 
-      if @comment.save
-        render json: @comment , status: :ok
-      else
-        render json: { comment: @comment, success: false, message: "Comment could not be saved. Errors: #{@comment.errors}" }, status: :unprocessable_entity
-      end
+    if @comment.save
+      render json: @comment , status: :ok
+    else
+      render json: { comment: @comment, success: false, message: "Comment could not be saved. Errors: #{@comment.errors}" }, status: :unprocessable_entity
     end
   end
 
   def update
     @post = Post.find(params[:post_id])
-    @post.with_lock do
-      @comment = Comment.find(params[:id])
+    @comment = Comment.find(params[:id])
 
-      if @comment.update(comment_params)
-        render json: @comment, status: :ok
-      else
-        render json: @comment.errors, status: :unprocessable_entity
-      end
+    if @comment.update(comment_params)
+      render json: @comment, status: :ok
+    else
+      render json: @comment.errors, status: :unprocessable_entity
     end
   end
 
   def destroy
     @post = Post.find(params[:post_id])
-    @post.with_lock do
-      @comment = Comment.find(params[:id])
+    @comment = Comment.find(params[:id])
 
-      if @comment.destroy
-        render json: nil, status: :no_content
-      else
-        render json: @comment.errors, status: :unprocessable_entity
-      end
+    if @comment.destroy
+      render json: nil, status: :no_content
+    else
+      render json: @comment.errors, status: :unprocessable_entity
     end
-  end
+end
 
   private
 
@@ -188,7 +182,6 @@ class PostsControllerTest < ControllerTest
   end
  
   def test_successful_index_request
-    skip "Temporary muted"
     get posts_path(only_path: true)
     assert last_response.ok?
     assert_equal 'application/json; charset=utf-8', last_response.content_type
@@ -196,7 +189,6 @@ class PostsControllerTest < ControllerTest
   end
 
   def test_successful_show_request
-    skip "Temporary muted"
     get post_path(@post, only_path: true)
     assert last_response.ok?
     assert_equal 'application/json; charset=utf-8', last_response.content_type
@@ -215,7 +207,6 @@ class ComentsControllerTest < ControllerTest
   end
  
   def test_successful_index_request
-    skip "Temporary muted"
     get post_comments_path(@post, only_path: true)
     assert last_response.ok?
     assert_equal 'application/json; charset=utf-8', last_response.content_type
@@ -223,7 +214,6 @@ class ComentsControllerTest < ControllerTest
   end
 
   def test_successful_show_request
-    skip "Temporary muted"
     get post_comment_url(@post, @post.comments.first, only_path: true)
     assert last_response.ok?
     assert_equal 'application/json; charset=utf-8', last_response.content_type
@@ -232,7 +222,6 @@ class ComentsControllerTest < ControllerTest
   end
 
   def test_successful_create_request
-    skip "Temporary muted"
     before_coments_count = @post.comments_count
     post post_comments_url(@post, only_path: true), comment: { author: 'joe.doe', content: 'A new comment' }
     assert last_response.ok?
@@ -243,7 +232,6 @@ class ComentsControllerTest < ControllerTest
   end
 
   def test_successful_update_request
-    skip "Temporary muted"
     patch post_comment_url(@post, @post.comments.first, only_path: true), comment: { content: 'An updated comment' }
     assert last_response.ok?
     assert_equal 'application/json; charset=utf-8', last_response.content_type
@@ -252,21 +240,7 @@ class ComentsControllerTest < ControllerTest
   end
 
   def test_successful_destroy_request
-    skip "Temporary muted"
     delete post_comment_url(@post, @post.comments.first, only_path: true)
     assert_equal 204, last_response.status
-  end
-
-  def test_successful_comment_inside_comment_creation
-    before_coments_count = @post.comments.first.comments.size
-    puts "\nBEFORE COMMENTS COUNT FOR NESTED ONES: #{before_coments_count}\n"
-    post post_comments_url(@post, only_path: true), params: { comment: { author: "John", content: "This is a nested comment" } }, as: :json
-
-    assert_equal 201, last_response.status
-    # assert last_response.ok?
-    # assert_equal 'application/json; charset=utf-8', last_response.content_type
-    # assert_equal "joe.doe", json_response[:author]
-    # assert_equal "A new comment", json_response[:content]
-    # assert_equal before_coments_count + 1, @post.reload.comments_count
   end
 end
