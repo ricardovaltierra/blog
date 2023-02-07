@@ -40,11 +40,13 @@ ActiveRecord::Schema.define do
 
   create_table :comments, force: true do |t|
     t.integer :post_id
+    t.integer :parent_id
     t.string :author
     t.text :content
   end
 
   add_index "posts", ["comments_count"], name: "index_posts_on_comments_count", using: :btree
+  add_index "comments", ["parent_id"], name: "index_comments_on_parent_id", using: :btree
 end
 
 class Post < ActiveRecord::Base
@@ -54,6 +56,8 @@ end
 
 class Comment < ActiveRecord::Base
   belongs_to :post, counter_cache: true
+  belongs_to :parent, class_name: "Comment", optional: true
+  has_many :comments, foreign_key: :parent_id, dependent: :destroy
 
   validates :content, length: { maximum: 500 }
   validates :author, presence: true
