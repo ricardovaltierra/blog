@@ -139,6 +139,11 @@ end
   end
 end
 
+class RepliesController < ActionController::Base
+  def create
+  end
+end
+
 # Tests code
 require 'minitest/autorun'
 require 'rack/test'
