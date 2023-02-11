@@ -25,9 +25,10 @@ class TestApp < Rails::Application
 
   routes.draw do
     resources :posts do
-      resources :comments, only: [:index, :show, :create, :update, :destroy]
+      resources :comments, only: [:index, :show, :create, :update, :destroy] do
+        resources :replies, only: [:index, :create]
+      end
     end
-    resources :comments, only: [:index, :show, :create, :update, :destroy]
   end
 end
 
@@ -238,5 +239,11 @@ class ComentsControllerTest < ControllerTest
   def test_successful_destroy_request
     delete post_comment_url(@post, @post.comments.first, only_path: true)
     assert_equal 204, last_response.status
+  end
+
+  def test_successful_create_request_for_nested_comment
+    parent_comment = @post.comments.first
+    before_comments_count = @post.comments.count
+    post post_comment_replies_path(@post, parent_comment, only_path: true), comment: { author: 'john.doe', content: 'A nested comment' }
   end
 end
