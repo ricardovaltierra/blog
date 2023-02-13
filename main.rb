@@ -141,6 +141,20 @@ end
 
 class RepliesController < ActionController::Base
   def create
+    parent = Comment.find(params[:comment_id])
+    reply = parent.replies.build(reply_params)
+
+    if reply.save
+      render json: reply , status: :ok
+    else
+      render json: { reply: reply, success: false, message: "Reply could not be saved. Errors: #{reply.errors}" }, status: :unprocessable_entity
+    end
+  end
+
+  private
+
+  def reply_params
+    params.require(:reply).permit(:author, :content)
   end
 end
 
@@ -250,5 +264,6 @@ class ComentsControllerTest < ControllerTest
     parent_comment = @post.comments.first
     before_comments_count = @post.comments.count
     post post_comment_replies_path(@post, parent_comment, only_path: true), comment: { author: 'john.doe', content: 'A nested comment' }
+    assert last_response.ok?
   end
 end
